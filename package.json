@@ -2,6 +2,7 @@
   "name": "Project-3",
   "version": "0.0.1",
   "description": "A video conferencing web app",
+  "license": "Unlicense",
   "main": "index.js",
   "repository": {
     "type": "git",
