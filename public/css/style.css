@@ -45,6 +45,7 @@ body.room {
   right: 10px;
   max-height: 40%;
   max-width: 20%;
+  z-index: 10000;
 }
 
 .room .other_videos {
