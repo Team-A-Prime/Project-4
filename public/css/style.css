@@ -1,0 +1,57 @@
+.flex {
+  display: flex;
+}
+
+form#join-container {
+  margin: auto;
+  padding-bottom: 20%;
+}
+
+input {
+  height: 36px;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 3px;
+  border: 1px solid #d6d6d6;
+}
+.input-and-button {
+  font-size: 0;
+}
+.input-and-button > input[type="text"] {
+  border-radius: 3px 0 0 3px;
+  border-right: none;
+  outline: none;
+}
+.input-and-button > input[type="submit"] {
+  border-radius: 0 3px 3px 0;
+  padding: 0 10px;
+  cursor: pointer;
+  background: white;
+}
+
+body.room {
+  margin: 0;
+  height: 100%;
+}
+
+.room video#vid_self {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  max-height: 40%;
+  max-width: 20%;
+}
+
+.room .other_videos {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+.room .other_videos > video {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  object-fit: contain;
+}
