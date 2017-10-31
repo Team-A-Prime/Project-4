@@ -17,12 +17,12 @@ const wss = new WebSocket.Server({ server })
 
 wss.rooms = {}
 
-wss.on('connection', socket => {
-  if (socket.upgradeReq.url.length < 2) {
+wss.on('connection', (socket, req) => {
+  if (req.url.length < 2) {
     socket.close()
     return
   }
-  let room = socket.upgradeReq.url.slice(1)
+  let room = req.url.slice(1)
   socket.id = Array.from({length: 32}).map(a=>Math.floor(Math.random()*chars.length)).join('')
   socket.room = room
   wss.rooms[room] = wss.rooms[room] || []
