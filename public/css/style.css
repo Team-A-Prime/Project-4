@@ -1,3 +1,7 @@
+html, body {
+  height: 100%;
+}
+
 .flex {
   display: flex;
 }
@@ -13,6 +17,7 @@ input {
   padding: 5px;
   border-radius: 3px;
   border: 1px solid #d6d6d6;
+  box-sizing: border-box;
 }
 .input-and-button {
   font-size: 0;
