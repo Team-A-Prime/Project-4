@@ -27,14 +27,94 @@ let need_to_call = false
 let self_stream = false
 let connected = false
 
+let call = () => {
+  pc.createOffer().then(desc => {
+    pc.setLocalDescription(desc).then(() => {
+      socket.send(JSON.stringify({
+        type: 'video-offer',
+        data: desc
+      }))
+    })
+  })
+}
+
+// Websocket-based signaling server
+const socket = new WebSocket(`wss://${window.location.host}${window.location.pathname}`)
+
+socket.onmessage = mes => {
+  const msg = JSON.parse(mes.data)
+
+  // All the ways to handle messages from the signaling server
+  const handlers = {
+    // Methods defined by the spec
+    'video-offer': () => {
+      pc.setRemoteDescription(new RTCSessionDescription(msg.data)).then(() => {
+        pc.createAnswer().then(desc => {
+          pc.setLocalDescription(desc).then(() => {
+            socket.send(JSON.stringify({
+              type: 'video-answer',
+              data: desc
+            }))
+          })
+        })
+      }).catch(err => console.error(err))
+    },
+    'video-answer': () => {
+      if (!connected) {
+        pc.setRemoteDescription(new RTCSessionDescription(msg.data))
+        connected = true
+      }
+    },
+    'new-ice-candidate': () => {
+      const candidate = new RTCIceCandidate({
+        sdpMLineIndex: msg.data.label,
+        candidate: msg.data.candidate,
+        sdpMid: msg.data.id
+      })
+      pc.addIceCandidate(candidate).catch(err => console.error(err))
+    },
+    // Methods specific to our signaling server
+    'init': () => {
+      socket.id = msg.id
+      if (!msg.call_room) return
+      self_stream ? call() : (need_to_call = true)
+    },
+    'close': () => {
+      pc.close()
+      connected = false
+      vid_other_1.srcObject = null
+      pc = createPeerConnection()
+      pc.addStream(self_stream)
+    },
+    'pong': () => {}
+  }
+
+  if (Object.keys(handlers).includes(msg.type)) {
+    handlers[msg.type]()
+  } else {
+    console.error('Unknown message from server:', msg)
+  }
+}
+
 // Initialize local vedeo stream and start the call if someone else is in the room
 navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
   self_stream = stream
   pc.addStream(stream)
   vid_self.srcObject = stream
   vid_self.play()
+  if (need_to_call) call()
 }).catch(error => {
   alert("Failed to access webcam")
   console.error(error)
 })
 
+// Heartbeat to keep the websocket open
+window.setInterval(() => {
+  socket.send(JSON.stringify({type: 'ping'}))
+}, 10000)
+
+// Be nice and tell the signaling server we're leaving
+window.addEventListener('beforeunload', () => {
+  socket.send(JSON.stringify({type: 'close'}))
+  pc.close()
+})
