@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "A video conferencing web app",
   "license": "Unlicense",
-  "main": "index.js",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node ./src/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Team-A-Prime/Project-3.git"

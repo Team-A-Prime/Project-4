@@ -8,5 +8,5 @@ It is capable of running a website where people can start video chats with each 
 
 ```
 npm install
-node index.js
+npm start
 ```
