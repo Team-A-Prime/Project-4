@@ -23,7 +23,7 @@ wss.on('connection', (socket, req) => {
     return
   }
   let room = req.url.slice(1)
-  socket.id = Array.from({length: 32}).map(a=>Math.floor(Math.random()*chars.length)).join('')
+  socket.id = Array.from({length: 32}).map(()=>chars[Math.floor(Math.random()*chars.length)]).join('')
   socket.room = room
   wss.rooms[room] = wss.rooms[room] || []
   wss.rooms[room].push(socket)
