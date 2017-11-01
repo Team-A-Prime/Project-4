@@ -40,6 +40,10 @@ wss.on('connection', (socket, req) => {
       return
     }
     for (let sock of wss.rooms[socket.room]) {
+      if (sock.readyState > 1) {
+        wss.rooms[socket.room] = wss.rooms[socket.room].filter(s => s.readyState < 2)
+        continue
+      }
       if (sock.id !== socket.id) {
         sock.send(JSON.stringify(msg))
       }
