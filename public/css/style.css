@@ -61,3 +61,17 @@ body.room {
   left: 0;
   object-fit: contain;
 }
+
+button.mute-button  {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.mute-button img {
+  height: 50px;
+  width: 50px;
+}

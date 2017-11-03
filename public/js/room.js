@@ -96,6 +96,13 @@ socket.onmessage = mes => {
   }
 }
 
+document.querySelector('.mute-button').addEventListener('click', () => {
+  self_stream.getAudioTracks()[0].enabled = !self_stream.getAudioTracks()[0].enabled
+  if (self_stream.getAudioTracks()[0].enabled) {
+    //TODO: change icon
+  }
+})
+
 // Initialize local vedeo stream and start the call if someone else is in the room
 navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
   self_stream = stream
