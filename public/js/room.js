@@ -1,5 +1,8 @@
 let createPeerConnection = () => {
-  const RTCconf = {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+  const RTCconf = {"iceServers": [
+    {"urls": ["stun:stun.l.google.com:19302"]},
+    {"urls": [`turn:${window.location.host}:5349`], "username":"public", "credential":"a"}
+  ]}
   let pc = new RTCPeerConnection(RTCconf)
 
   pc.onicecandidate = event => {
