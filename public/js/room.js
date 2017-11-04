@@ -126,6 +126,7 @@ $('.mute-button').addEventListener('click', () => {
   const enabled = self_stream.getAudioTracks()[0].enabled
   self_stream.getAudioTracks()[0].enabled = !enabled
   $('.mute-button').className = 'mute-button mute-'+(enabled?'enabled':'disabled')
+  $('.mute-button').title = (enabled?'Unm':'M')+'ute your microphone'
 })
 
 $('#vid_self').addEventListener('click', () => {
