@@ -125,6 +125,7 @@ $('.mute-button').addEventListener('click', () => {
   $('.mute-button').className = 'mute-button mute-'+(enabled?'enabled':'disabled')
 })
 
+// Rotates #vid_self in circle. Seems to break frequently. TODO: make more stable
 $('#vid_self').addEventListener('click', () => {
   $('#vid_self').setAttribute('data-pos', ({
     'bottom-right': 'bottom-left',
