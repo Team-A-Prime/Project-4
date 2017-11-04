@@ -93,3 +93,20 @@ button.mute-button {
   fill: white;
   stroke: white;
 }
+
+#vid_self[data-pos="bottom-right"] {
+  bottom: 10px;
+  right: 10px;
+}
+#vid_self[data-pos="bottom-left"] {
+  bottom: 10px;
+  left: 10px;
+}
+#vid_self[data-pos="top-right"] {
+  top: 10px;
+  right: 10px;
+}
+#vid_self[data-pos="top-left"] {
+  top: 10px;
+  left: 10px;
+}

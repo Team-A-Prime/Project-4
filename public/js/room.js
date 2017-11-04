@@ -126,32 +126,10 @@ $('.mute-button').addEventListener('click', () => {
 })
 
 $('#vid_self').addEventListener('click', () => {
-  if($('#vid_self').classList.contains('bottom-right')) {
-    //bottom right -> bottom left
-    $('#vid_self').style.right = ""
-    $('#vid_self').style.left = "10px"
-    $('#vid_self').classList.remove("bottom-right");
-    $('#vid_self').classList.add("bottom-left");
-  }
-  else if($('#vid_self').classList.contains('bottom-left')) {
-    //bottom left -> top left
-    $('#vid_self').style.bottom = ""
-    $('#vid_self').style.top = "10px"
-    $('#vid_self').classList.remove("bottom-left");
-    $('#vid_self').classList.add("top-left");
-  }
-  else if($('#vid_self').classList.contains('top-left')) {
-    //top left -> top right
-    $('#vid_self').style.left = ""
-    $('#vid_self').style.right = "10px"
-    $('#vid_self').classList.remove("top-left");
-    $('#vid_self').classList.add("top-right");
-  }
-  else if($('#vid_self').classList.contains('top-right')) {
-    //top right -> bottom right
-    $('#vid_self').style.top = ""
-    $('#vid_self').style.bottom = "10px"
-    $('#vid_self').classList.remove("top-right");
-    $('#vid_self').classList.add("bottom-right");
-  }
+  $('#vid_self').setAttribute('data-pos', ({
+    'bottom-right': 'top-right',
+    'top-right'   : 'top-left',
+    'top-left'    : 'bottom-left',
+    'bottom-left' : 'bottom-right'
+  })[$('#vid_self').getAttribute('data-pos')])
 })
