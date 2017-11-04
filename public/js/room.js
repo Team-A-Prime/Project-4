@@ -96,13 +96,6 @@ socket.onmessage = mes => {
   }
 }
 
-document.querySelector('.mute-button').addEventListener('click', () => {
-  self_stream.getAudioTracks()[0].enabled = !self_stream.getAudioTracks()[0].enabled
-  if (self_stream.getAudioTracks()[0].enabled) {
-    //TODO: change icon
-  }
-})
-
 // Initialize local vedeo stream and start the call if someone else is in the room
 navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
   self_stream = stream
@@ -125,3 +118,10 @@ window.addEventListener('beforeunload', () => {
   socket.send(JSON.stringify({type: 'close'}))
   pc.close()
 })
+
+$('.mute-button').addEventListener('click', () => {
+  const enabled = self_stream.getAudioTracks()[0].enabled
+  self_stream.getAudioTracks()[0].enabled = !enabled
+  $('.mute-button').className = 'mute-button mute-'+(enabled?'enabled':'disabled')
+})
+
