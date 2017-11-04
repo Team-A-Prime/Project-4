@@ -127,9 +127,9 @@ $('.mute-button').addEventListener('click', () => {
 
 $('#vid_self').addEventListener('click', () => {
   $('#vid_self').setAttribute('data-pos', ({
-    'bottom-right': 'top-right',
-    'top-right'   : 'top-left',
-    'top-left'    : 'bottom-left',
-    'bottom-left' : 'bottom-right'
+    'bottom-right': 'bottom-left',
+    'bottom-left' : 'top-left',
+    'top-left'    : 'top-right',
+    'top-right'   : 'bottom-right'
   })[$('#vid_self').getAttribute('data-pos')])
 })
