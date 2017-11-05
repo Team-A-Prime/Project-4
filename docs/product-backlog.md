@@ -2,4 +2,28 @@
  - Get webcam interaction with browser working
    - Complexity: **low**
    - Time requirement: **low**
-   - Notes: This is relatively straightforward with modern web technology
+   - This is relatively straightforward with modern web technology
+ - Get p2p video chat working over WebRTC
+    - Complexity: **high**. This is the most complex part of the application
+    - Time requirement: **high**.
+    - Ben Haney is familiar with this technology, so he should spearhead the development effort on it
+ - Manage multiple rooms
+   - Complexity: **medium**.
+   - Time requirement: **medium**.
+   - If we write the code for the single p2p video chat modular enough, this should be straightforward to implement. If we don't, then this could take awhile
+ - Group chats
+   - Complexity: **high**.
+   - Time requirement: **medium**.
+   - This shouldn't require massive code changes if we write the code well the first time (read: if we write it modular enough). However, it has high complexity because it introduces new bug-vectors and edge cases that need to be tested/checked.
+ - Text chat
+   - Complexity: **low**.
+   - Time requirement: **medium**.
+   - This isn't too difficult to add, but will take some time to add to the application
+ - Accounts
+   - Complexity: **medium**.
+   - Time requirement: **medium**.
+   - This will require adding a database backend to store account credentials
+- Recorded sessions
+   - Complexity: **high**.
+   - Time requirement: **high**.
+   - This will require serious planning about how to store and retrieve (potentially large) video files on/from the server
