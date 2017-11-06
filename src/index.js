@@ -12,9 +12,19 @@ app.get('/:roomid', (req, res) => {
   res.sendfile('./public/room.html')
 })
 
+/**
+ * Webserver for static files
+ */
 const server = app.listen(process.env.NODE_PORT || 8087)
+
+/**
+ * Websocket signaling server for exchanging negotiation messages between peers
+ */
 const wss = new WebSocket.Server({ server })
 
+/**
+ * List of chat-rooms
+ */
 wss.rooms = {}
 
 wss.on('connection', (socket, req) => {

@@ -1,3 +1,7 @@
+/**
+ * Constructs RTCPeerConnection and binds our event listeners to it
+ * @return {RTCPeerConnection} The modified PeerConnection object
+ */
 let createPeerConnection = () => {
   const RTCconf = {"iceServers": [
     {"urls": ["stun:stun.l.google.com:19302"]},
@@ -7,7 +11,7 @@ let createPeerConnection = () => {
 
   pc.onicecandidate = event => {
     if (!event.candidate) return
-    socket.send(JSON.stringify({
+    signaler.send(JSON.stringify({
       type: 'new-ice-candidate',
       data: {
         label: event.candidate.sdpMLineIndex,
@@ -30,10 +34,13 @@ let need_to_call = false
 let self_stream = false
 let connected = false
 
+/**
+ * Initiates a call to the room
+ */
 let call = () => {
   pc.createOffer().then(desc => {
     pc.setLocalDescription(desc).then(() => {
-      socket.send(JSON.stringify({
+      signaler.send(JSON.stringify({
         type: 'video-offer',
         data: desc
       }))
@@ -41,10 +48,12 @@ let call = () => {
   })
 }
 
-// Websocket-based signaling server
-const socket = new WebSocket(`wss://${window.location.host}${window.location.pathname}`)
+/**
+ * Websocket connection to signaling server, used to exchange negotiation messages with other peers
+ */
+const signaler = new WebSocket(`wss://${window.location.host}${window.location.pathname}`)
 
-socket.onmessage = mes => {
+signaler.onmessage = mes => {
   const msg = JSON.parse(mes.data)
 
   // All the ways to handle messages from the signaling server
@@ -54,7 +63,7 @@ socket.onmessage = mes => {
       pc.setRemoteDescription(new RTCSessionDescription(msg.data)).then(() => {
         pc.createAnswer().then(desc => {
           pc.setLocalDescription(desc).then(() => {
-            socket.send(JSON.stringify({
+            signaler.send(JSON.stringify({
               type: 'video-answer',
               data: desc
             }))
@@ -78,7 +87,7 @@ socket.onmessage = mes => {
     },
     // Methods specific to our signaling server
     'init': () => {
-      socket.id = msg.id
+      signaler.id = msg.id
       if (!msg.call_room) return
       self_stream ? call() : (need_to_call = true)
     },
@@ -113,12 +122,12 @@ navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
 
 // Heartbeat to keep the websocket open
 window.setInterval(() => {
-  socket.send(JSON.stringify({type: 'ping'}))
+  signaler.send(JSON.stringify({type: 'ping'}))
 }, 10000)
 
 // Be nice and tell the signaling server we're leaving
 window.addEventListener('beforeunload', () => {
-  socket.send(JSON.stringify({type: 'close'}))
+  signaler.send(JSON.stringify({type: 'close'}))
   pc.close()
 })
 

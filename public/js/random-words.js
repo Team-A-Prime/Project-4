@@ -245,4 +245,9 @@ const words = [
   "Your","Yourself","Youth","Zero","Zoo"
 ];
 
+/**
+ * Generates a random phrase
+ * @param {number} length - Number of words in the phrase
+ * @return {String} Phrase containing "length" words
+ */
 let randomPhrase = length => Array.from({length: length}).map(a=>words[Math.floor(Math.random()*words.length)]).join('')
