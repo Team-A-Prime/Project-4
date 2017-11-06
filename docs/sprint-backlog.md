@@ -1,4 +1,4 @@
-# Product backlog
+# Sprint backlog
  - Get webcam interaction with browser working
    - Complexity: **low**
    - Time requirement: **low**
