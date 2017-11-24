@@ -40,7 +40,8 @@ wss.on('connection', (socket, req) => {
   let init_mes = {
     type: 'init',
     id: socket.id,
-    call_room: (wss.rooms[room].length > 1)
+    call_room: (wss.rooms[room].length > 1),
+    members: wss.rooms[room].map(sock => sock.id).filter(id => id != socket.id)
   }
   socket.send(JSON.stringify(init_mes))
   socket.on('message', data => {
@@ -54,9 +55,9 @@ wss.on('connection', (socket, req) => {
         wss.rooms[socket.room] = wss.rooms[socket.room].filter(s => s.readyState < 2)
         continue
       }
-      if (sock.id !== socket.id) {
-        sock.send(JSON.stringify(msg))
-      }
+      if (msg.to && msg.to != sock.id) continue
+      if (sock.id == socket.id) continue
+      sock.send(JSON.stringify(msg))
     }
     if (msg.type == 'close') {
       socket.close()

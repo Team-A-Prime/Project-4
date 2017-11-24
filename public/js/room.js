@@ -1,51 +1,58 @@
 /**
  * Constructs RTCPeerConnection and binds our event listeners to it
+ * @param {String} id - Optional peer id
  * @return {RTCPeerConnection} The modified PeerConnection object
  */
-let createPeerConnection = () => {
+let createPeerConnection = (id) => {
   const RTCconf = {"iceServers": [
     {"urls": ["stun:stun.l.google.com:19302"]},
     {"urls": [`turn:${window.location.host}:5349`], "username":"public", "credential":"a"}
   ]}
   let pc = new RTCPeerConnection(RTCconf)
+  if (id) pc.id = id
 
   pc.onicecandidate = event => {
     if (!event.candidate) return
-    signaler.send(JSON.stringify({
-      type: 'new-ice-candidate',
-      data: {
-        label: event.candidate.sdpMLineIndex,
-        id: event.candidate.sdpMid,
-        candidate: event.candidate.candidate
-      }
-    }))
+    signaler.say('new-ice-candidate', {
+      label: event.candidate.sdpMLineIndex,
+      id: event.candidate.sdpMid,
+      candidate: event.candidate.candidate
+    }, pc.id)
   }
 
   pc.addEventListener('addstream', event => {
-    vid_other_1.srcObject = event.stream
-    vid_other_1.play()
+    let video = document.createElement('video')
+    $('#peer_videos').appendChild(video)
+    video.id = `peer_video_${pc.id}`
+    video.srcObject = event.stream
+    video.play()
   })
+
+  if (self_stream) pc.addStream(self_stream)
 
   return pc
 }
 
-let pc = createPeerConnection()
+let pcs = {}
 let need_to_call = false
 let self_stream = false
 let connected = false
+let id = false
 
 /**
  * Initiates a call to the room
+ * @param {String[]} peer_ids - An array of peer ids to be called
  */
-let call = () => {
-  pc.createOffer().then(desc => {
-    pc.setLocalDescription(desc).then(() => {
-      signaler.send(JSON.stringify({
-        type: 'video-offer',
-        data: desc
-      }))
+let call = (peer_ids) => {
+  for (let peer_id of peer_ids) {
+    let pc = createPeerConnection(peer_id)
+    pcs[peer_id] = pc
+    pc.createOffer().then(desc => {
+      pc.setLocalDescription(desc).then(() => {
+        signaler.say('video-offer', desc, peer_id)
+      })
     })
-  })
+  }
 }
 
 /**
@@ -53,8 +60,19 @@ let call = () => {
  */
 const signaler = new WebSocket(`wss://${window.location.host}${window.location.pathname}`)
 
-signaler.onmessage = mes => {
-  const msg = JSON.parse(mes.data)
+signaler.say = (type, data, to = false) => {
+  signaler.send(JSON.stringify({type, data, to, from: id}))
+}
+
+signaler.onmessage = raw_message => {
+  // msg is constructed out of a different "data" than we sent. i.e, raw_message.data.data exists
+  const msg = JSON.parse(raw_message.data)
+
+  let pc
+  if (msg.from) {
+    pc = pcs[msg.from] ? pcs[msg.from] : createPeerConnection(msg.from)
+    pcs[msg.from] = pc
+  }
 
   // All the ways to handle messages from the signaling server
   const handlers = {
@@ -63,10 +81,7 @@ signaler.onmessage = mes => {
       pc.setRemoteDescription(new RTCSessionDescription(msg.data)).then(() => {
         pc.createAnswer().then(desc => {
           pc.setLocalDescription(desc).then(() => {
-            signaler.send(JSON.stringify({
-              type: 'video-answer',
-              data: desc
-            }))
+            signaler.say('video-answer', desc, pc.id)
           })
         })
       }).catch(err => console.error(err))
@@ -87,14 +102,15 @@ signaler.onmessage = mes => {
     },
     // Methods specific to our signaling server
     'init': () => {
-      signaler.id = msg.id
+      id = msg.id
       if (!msg.call_room) return
-      self_stream ? call() : (need_to_call = true)
+      self_stream ? call(msg.members) : (need_to_call = msg.members)
     },
     'close': () => {
       pc.close()
       connected = false
-      vid_other_1.srcObject = null
+      $(`#peer_video_${pc.id}`).srcObject = null
+      $(`#peer_video_${pc.id}`).remove()
       pc = createPeerConnection()
       pc.addStream(self_stream)
     },
@@ -111,10 +127,9 @@ signaler.onmessage = mes => {
 // Initialize local vedeo stream and start the call if someone else is in the room
 navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
   self_stream = stream
-  pc.addStream(stream)
   vid_self.srcObject = stream
   vid_self.play()
-  if (need_to_call) call()
+  if (need_to_call) call(need_to_call)
 }).catch(error => {
   alert("Failed to access webcam")
   console.error(error)
@@ -122,13 +137,15 @@ navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
 
 // Heartbeat to keep the websocket open
 window.setInterval(() => {
-  signaler.send(JSON.stringify({type: 'ping'}))
+  signaler.say('ping')
 }, 10000)
 
 // Be nice and tell the signaling server we're leaving
 window.addEventListener('beforeunload', () => {
-  signaler.send(JSON.stringify({type: 'close'}))
-  pc.close()
+  signaler.say('close')
+  for (let pc of pcs) {
+    pc.close()
+  }
 })
 
 $('.mute-button').addEventListener('click', () => {

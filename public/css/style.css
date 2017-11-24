@@ -46,17 +46,14 @@ body.room {
   z-index: 10000;
 }
 
-.room .other_videos {
+.room #peer_videos {
   position: relative;
   height: 100%;
   width: 100%;
 }
-.room .other_videos > video {
+.room #peer_videos > video {
   height: 100%;
   width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
   object-fit: contain;
 }
 
