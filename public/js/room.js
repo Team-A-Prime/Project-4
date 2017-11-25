@@ -101,6 +101,9 @@ signaler.onmessage = raw_message => {
       pc.addIceCandidate(candidate).catch(err => console.error(err))
     },
     // Methods specific to our signaling server
+    'chat': () => {
+      create_chat_line(msg.from.slice(0,6), msg.data)
+    },
     'init': () => {
       id = msg.id
       if (!msg.call_room) return
@@ -148,6 +151,31 @@ window.addEventListener('beforeunload', () => {
   }
 })
 
+let chat_input = $('#chat_wrapper > input')
+// Send chat text
+chat_input.addEventListener('keydown', e => {
+  if (e.key == 'Enter') {
+    text_to_send = chat_input.value
+    chat_input.value = ''
+    signaler.say('chat', text_to_send)
+    return false
+  }
+})
+
+// Convienience method to create a chat line in the chatbox
+let create_chat_line = (from, text) => {
+  let line_el = document.createElement('span')
+  let from_el = document.createElement('span')
+  from_el.textContent = from
+  let text_el = document.createTextNode(`: ${text}`)
+  line_el.appendChild(from_el)
+  line_el.appendChild(text_el)
+  $('#chatbox').appendChild(line_el)
+  // Hash name to set color
+  let n = from.split('').reduce((a,b)=>a+b.charCodeAt(0),0)
+  from_el.style.color = `rgb(${n%256}, ${Math.floor(n**1.5%256)}, ${Math.floor(n**2%256)})`
+}
+
 $('.mute-button').addEventListener('click', () => {
   const enabled = self_stream.getAudioTracks()[0].enabled
   self_stream.getAudioTracks()[0].enabled = !enabled
@@ -156,10 +184,10 @@ $('.mute-button').addEventListener('click', () => {
 })
 
 $('#vid_self').addEventListener('click', () => {
-  $('#vid_self').setAttribute('data-pos', ({
+  $('body').setAttribute('data-layout', ({
     'bottom-right': 'top-right',
     'top-right'   : 'top-left',
     'top-left'    : 'bottom-left',
     'bottom-left' : 'bottom-right'
-  })[$('#vid_self').getAttribute('data-pos')])
+  })[$('body').getAttribute('data-layout')])
 })

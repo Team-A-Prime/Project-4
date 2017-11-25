@@ -56,7 +56,7 @@ wss.on('connection', (socket, req) => {
         continue
       }
       if (msg.to && msg.to != sock.id) continue
-      if (sock.id == socket.id) continue
+      if (sock.id == socket.id && msg.type != 'chat') continue
       sock.send(JSON.stringify(msg))
     }
     if (msg.type == 'close') {
