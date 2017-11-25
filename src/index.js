@@ -70,4 +70,7 @@ wss.on('connection', (socket, req) => {
       wss.rooms[room].members = wss.rooms[room].members.filter(s => s.readyState < 2)
     }
   })
+  socket.on('close', () => {
+    if (wss.rooms[room].members.length == 0) wss.rooms[room] = false
+  })
 })
