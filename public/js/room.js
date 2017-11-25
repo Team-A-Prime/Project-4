@@ -38,7 +38,7 @@ let need_to_call = false
 let self_stream = false
 let connected = false
 let id = false
-let name = false
+let name = localStorage.name || false
 
 /**
  * Initiates a call to the room
@@ -166,6 +166,7 @@ chat_input.addEventListener('keydown', e => {
       let command = chat_input.value.slice(1).split(' ')
       if (command[0] == 'name' && command[1]) {
         signaler.say('chat', {type: 'name', from: name?name:id, text: command[1]})
+        localStorage.name = command[1]
         name = command[1]
       }
     } else {
