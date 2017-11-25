@@ -6,9 +6,15 @@
     <script type="text/javascript" src="/js/utils.js"></script>
     <script type="text/javascript" src="/js/room.js" defer></script>
   </head>
-  <body class="room flex">
-    <video id="vid_self" data-pos="bottom-right" muted></video>
-    <div id="peer_videos" class="flex"></div>
+  <body class="room">
+    <div id="peer_videos"></div>
+    <div id="sidebar">
+      <div id="chat_wrapper">
+        <div id="chatbox"></div>
+        <input type="text" placeholder="Chat">
+      </div>
+      <video id="vid_self" muted></video>
+    </div>
     <button class="mute-button mute-disabled" title="Mute your microphone">
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
          viewBox="0 0 58 58" xml:space="preserve">

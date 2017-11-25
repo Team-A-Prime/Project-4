@@ -35,21 +35,15 @@ input {
 }
 
 body.room {
+  display: flex;
   margin: 0;
   height: 100%;
 }
 
-.room video#vid_self {
-  position: fixed;
-  max-height: 40%;
-  max-width: 20%;
-  z-index: 10000;
-}
-
 .room #peer_videos {
-  position: relative;
+  display: flex;
+  flex-grow: 1;
   height: 100%;
-  width: 100%;
 }
 .room #peer_videos > video {
   height: 100%;
@@ -57,10 +51,35 @@ body.room {
   object-fit: contain;
 }
 
+.room #sidebar {
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+  width: 20%;
+}
+.room #chat_wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.room #chat_wrapper > #chatbox {
+  flex-grow: 1;
+  border: 1px solid #d6d6d6;
+}
+.room #chat_wrapper > input {
+  border-top: none;
+  border-radius: 0 3px 3px 0;
+}
+.room video#vid_self {
+  max-height: 40%;
+  max-width: 100%;
+  padding-top: 5px;
+}
+
 button.mute-button {
   position: fixed;
   bottom: 20px;
-  left: 50%;
+  left: calc(50% - 35px);
   border: 1px solid #AAA;
   border-radius: 100px;
   outline: none;
@@ -87,21 +106,4 @@ button.mute-button {
 .mute-button.mute-enabled svg{
   fill: white;
   stroke: white;
-}
-
-#vid_self[data-pos="bottom-right"] {
-  bottom: 10px;
-  right: 10px;
-}
-#vid_self[data-pos="bottom-left"] {
-  bottom: 10px;
-  left: 10px;
-}
-#vid_self[data-pos="top-right"] {
-  top: 10px;
-  right: 10px;
-}
-#vid_self[data-pos="top-left"] {
-  top: 10px;
-  left: 10px;
 }
