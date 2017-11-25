@@ -38,6 +38,7 @@ let need_to_call = false
 let self_stream = false
 let connected = false
 let id = false
+let name = false
 
 /**
  * Initiates a call to the room
@@ -102,10 +103,15 @@ signaler.onmessage = raw_message => {
     },
     // Methods specific to our signaling server
     'chat': () => {
-      create_chat_line(msg.from.slice(0,6), msg.data)
+      create_chat_line(msg.data, msg.from)
     },
     'init': () => {
       id = msg.id
+      name = name||msg.name
+      for (let line of msg.chats) {
+        create_chat_line(line.data, line.from)
+      }
+      signaler.say('chat', {type: 'init', from: name?name:id})
       if (!msg.call_room) return
       self_stream ? call(msg.members) : (need_to_call = msg.members)
     },
@@ -146,6 +152,7 @@ window.setInterval(() => {
 // Be nice and tell the signaling server we're leaving
 window.addEventListener('beforeunload', () => {
   signaler.say('close')
+  signaler.say('chat', {type: 'close', from: name?name:id})
   for (let pc of pcs) {
     pc.close()
   }
@@ -155,25 +162,47 @@ let chat_input = $('#chat_wrapper > input')
 // Send chat text
 chat_input.addEventListener('keydown', e => {
   if (e.key == 'Enter') {
-    text_to_send = chat_input.value
+    if (chat_input.value[0] == '/') {
+      let command = chat_input.value.slice(1).split(' ')
+      if (command[0] == 'name' && command[1]) {
+        signaler.say('chat', {type: 'name', from: name?name:id, text: command[1]})
+        name = command[1]
+      }
+    } else {
+      signaler.say('chat', {type: 'message', from: name?name:id, text: chat_input.value})
+    }
     chat_input.value = ''
-    signaler.say('chat', text_to_send)
     return false
   }
 })
 
 // Convienience method to create a chat line in the chatbox
-let create_chat_line = (from, text) => {
+let create_chat_line = (data, hash_string = data.from) => {
   let line_el = document.createElement('span')
-  let from_el = document.createElement('span')
-  from_el.textContent = from
-  let text_el = document.createTextNode(`: ${text}`)
-  line_el.appendChild(from_el)
-  line_el.appendChild(text_el)
+  if (data.type == 'init') {
+    line_el.className = 'chat-info'
+    line_el.textContent = `${data.from} has joined`
+  }
+  if (data.type == 'close') {
+    line_el.className = 'chat-info'
+    line_el.textContent = `${data.from} has left`
+  }
+  if (data.type == 'name') {
+    line_el.className = 'chat-info'
+    line_el.textContent = `${data.from} is now known as ${data.text}`
+  }
+  if (data.type == 'message') {
+    let from_el = document.createElement('span')
+    from_el.textContent = data.from
+    let text_el = document.createTextNode(`: ${data.text}`)
+    line_el.appendChild(from_el)
+    line_el.appendChild(text_el)
+    // Hash name to set color
+    let n = hash_string.split('').reduce((a,b)=>a+b.charCodeAt(0),0)
+    from_el.style.color = `rgb(${n%256}, ${Math.floor(n**1.5%256)}, ${Math.floor(n**2%256)})`
+  }
   $('#chatbox').appendChild(line_el)
-  // Hash name to set color
-  let n = from.split('').reduce((a,b)=>a+b.charCodeAt(0),0)
-  from_el.style.color = `rgb(${n%256}, ${Math.floor(n**1.5%256)}, ${Math.floor(n**2%256)})`
+  $('#chatbox').scrollTop = $('#chatbox').scrollHeight
 }
 
 $('.mute-button').addEventListener('click', () => {
