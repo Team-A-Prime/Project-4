@@ -26,6 +26,62 @@ let createPeerConnection = (id) => {
     video.id = `peer_video_${pc.id}`
     video.srcObject = event.stream
     video.play()
+    if (window.clm) {
+      // Oh boy we have face tracking
+      video.style.height = '100%'
+      video.style.maxWidth = '100%'
+      setTimeout(() => {
+        let vid_size = video.getBoundingClientRect()
+        video.width = vid_size.width
+        video.height = vid_size.height
+        let ctracker = new clm.tracker()
+        ctracker.init()
+        ctracker.start(video)
+        let overlay = document.createElement('canvas')
+        overlay.id = `overlay_${pc.id}`
+        overlay.className = 'overlay'
+        overlay.width = vid_size.width
+        overlay.height = vid_size.height
+        overlay.style.left = vid_size.left+'px'
+        overlay.style.top = vid_size.top+'px'
+        document.body.appendChild(overlay)
+        let ctx = overlay.getContext('2d')
+        let mustache = new Image()
+        let monocle = new Image()
+        mustache.src = '/img/mustache.png'
+        monocle.src = '/img/monocle.png'
+        let draw = () => {
+          requestAnimationFrame(draw)
+          ctx.clearRect(0, 0, overlay.width, overlay.height)
+          if (ctracker.getScore() > 0.45) {
+            let pos = ctracker.getCurrentPosition()
+            if (pos) {
+              let scale = Math.sqrt((pos[14][0] - pos[0][0])**2 + (pos[14][1] - pos[0][1])**2)/170
+
+              let ang_mustache = Math.atan((pos[36][1]-pos[38][1])/(pos[36][0]-pos[38][0]))
+              ctx.setTransform(scale, 0, 0, scale, pos[47][0], (pos[47][1]+pos[37][1])/2+10)
+              ctx.rotate(ang_mustache)
+              ctx.drawImage(mustache, -100, -50)
+              ctx.setTransform(1,0,0,1,0,0)
+
+              let ang_monocle = Math.atan((pos[30][1]-pos[28][1])/(pos[30][0]-pos[28][0]))
+              ctx.setTransform(scale, 0, 0, scale, pos[32][0], pos[32][1])
+              ctx.rotate(ang_monocle)
+              ctx.drawImage(monocle, -65, -65)
+              ctx.setTransform(1,0,0,1,0,0)
+            }
+          }
+        }
+        draw()
+      }, 2000)
+    } else {
+      // No face tracking. Proceed normally
+      let num_vids = [].concat($('#peer_videos > video')).length
+      for (let vid of [].concat($('#peer_videos > video'))) {
+        vid.style.maxWidth = 100/Math.ceil(Math.sqrt(num_vids))+'%'
+        vid.style.height = 100/Math.ceil(Math.sqrt(num_vids))+'%'
+      }
+    }
   })
 
   if (self_stream) pc.addStream(self_stream)
@@ -36,7 +92,6 @@ let createPeerConnection = (id) => {
 let pcs = {}
 let need_to_call = false
 let self_stream = false
-let connected = false
 let id = false
 let name = localStorage.name || false
 
@@ -88,10 +143,7 @@ signaler.onmessage = raw_message => {
       }).catch(err => console.error(err))
     },
     'video-answer': () => {
-      if (!connected) {
-        pc.setRemoteDescription(new RTCSessionDescription(msg.data))
-        connected = true
-      }
+      pc.setRemoteDescription(new RTCSessionDescription(msg.data))
     },
     'new-ice-candidate': () => {
       const candidate = new RTCIceCandidate({
@@ -99,7 +151,7 @@ signaler.onmessage = raw_message => {
         candidate: msg.data.candidate,
         sdpMid: msg.data.id
       })
-      pc.addIceCandidate(candidate).catch(err => console.error(err))
+      pc.addIceCandidate(candidate).catch(err => console.log('Error processing ICE candidate from '+msg.from, candidate))
     },
     // Methods specific to our signaling server
     'chat': () => {
@@ -117,11 +169,16 @@ signaler.onmessage = raw_message => {
     },
     'close': () => {
       pc.close()
-      connected = false
       $(`#peer_video_${pc.id}`).srcObject = null
       $(`#peer_video_${pc.id}`).remove()
-      pc = createPeerConnection()
-      pc.addStream(self_stream)
+      if (window.clm) {
+        $(`#overlay_${pc.id}`).remove()
+      }
+      let num_vids = [].concat($('#peer_videos > video')).length
+      for (let vid of [].concat($('#peer_videos > video'))) {
+        vid.style.maxWidth = 100/Math.ceil(Math.sqrt(num_vids))+'%'
+        vid.style.height = 100/Math.ceil(Math.sqrt(num_vids))+'%'
+      }
     },
     'pong': () => {}
   }
@@ -134,7 +191,11 @@ signaler.onmessage = raw_message => {
 }
 
 // Initialize local vedeo stream and start the call if someone else is in the room
-navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
+navigator.mediaDevices.getUserMedia({audio: true, video: {
+  width: { min: 640 },
+  height: { min: 480 },
+  facingMode: "user"
+}}).then(stream => {
   self_stream = stream
   vid_self.srcObject = stream
   vid_self.play()
@@ -153,8 +214,8 @@ window.setInterval(() => {
 window.addEventListener('beforeunload', () => {
   signaler.say('close')
   signaler.say('chat', {type: 'close', from: name?name:id})
-  for (let pc of pcs) {
-    pc.close()
+  for (let pc in pcs) {
+    pcs[pc].close()
   }
 })
 
@@ -165,9 +226,9 @@ chat_input.addEventListener('keydown', e => {
     if (chat_input.value[0] == '/') {
       let command = chat_input.value.slice(1).split(' ')
       if (command[0] == 'name' && command[1]) {
-        signaler.say('chat', {type: 'name', from: name?name:id, text: command[1]})
-        localStorage.name = command[1]
-        name = command[1]
+        signaler.say('chat', {type: 'name', from: name?name:id, text: command.slice(1).join(' ')})
+        localStorage.name = command.slice(1).join(' ')
+        name = command.slice(1).join(' ')
       }
     } else {
       signaler.say('chat', {type: 'message', from: name?name:id, text: chat_input.value})

@@ -5,6 +5,6 @@
  */
 let $ = input => {
   let elements = document.querySelectorAll(input)
-  if (elements.length > 1) return Array.from(elements)
+  if (elements.length != 1) return Array.from(elements)
   return elements[0]
 }

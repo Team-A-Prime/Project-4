@@ -41,14 +41,14 @@ body.room {
 }
 
 .room #peer_videos {
-  display: flex;
-  flex-grow: 1;
   max-width: 80%;
+  width: 80%;
   height: 100%;
+  font-size: 0;
+  text-align: center;
 }
 .room #peer_videos > video {
-  height: 100%;
-  margin: auto;
+  display: inline-block;
   object-fit: contain;
 }
 
@@ -69,6 +69,7 @@ body.room {
   font-family: sans-serif;
   padding: 5px;
   overflow: scroll;
+  word-wrap: break-word;
 }
 .room #chat_wrapper > #chatbox > span {
   display: block;
@@ -98,7 +99,7 @@ body[data-layout="bottom-left"], body[data-layout="top-left"] {
 button.mute-button {
   position: fixed;
   bottom: 20px;
-  left: calc(50% - 35px);
+  right: calc(10% - 35px);
   border: 1px solid #AAA;
   border-radius: 100px;
   outline: none;
@@ -125,4 +126,8 @@ button.mute-button {
 .mute-button.mute-enabled svg{
   fill: white;
   stroke: white;
+}
+
+canvas.overlay {
+  position: fixed;
 }

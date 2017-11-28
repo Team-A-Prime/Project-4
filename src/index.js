@@ -1,15 +1,18 @@
 const express = require('express')
 const WebSocket = require('ws')
+const fs = require('fs')
 
 const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const app = express()
 app.use(express.static('./public'))
 
 app.get('/:roomid', (req, res) => {
-  if (!wss.rooms[req.params.roomid]) {
-    wss.rooms[req.params.roomid] = []
-  }
-  res.sendfile('./public/room.html')
+  if (!wss.rooms[req.params.roomid]) wss.rooms[req.params.roomid] = []
+
+  let page = fs.readFileSync('./public/room.html', 'utf8')
+  let rep = (req.params.roomid.slice(0,2) == 'm-') ? '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clmtrackr/1.0.2/clmtrackr.min.js"></script>' : ''
+
+  res.send(page.replace('{{clm}}', rep))
 })
 
 /**
