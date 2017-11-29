@@ -110,6 +110,10 @@ let debug = false
  * @param {String[]} peer_ids - An array of peer ids to be called
  */
 let call = (peer_ids) => {
+  if (window.location.pathname.slice(0,3) == '/m-' && peer_ids.length > 1) {
+    alert('Room full')
+    return
+  }
   for (let peer_id of peer_ids) {
     let pc = createPeerConnection(peer_id)
     pcs[peer_id] = pc
