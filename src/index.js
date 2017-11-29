@@ -10,7 +10,7 @@ app.get('/:roomid', (req, res) => {
   if (!wss.rooms[req.params.roomid]) wss.rooms[req.params.roomid] = []
 
   let page = fs.readFileSync('./public/room.html', 'utf8')
-  let rep = (req.params.roomid.slice(0,2) == 'm-') ? '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clmtrackr/1.0.2/clmtrackr.min.js"></script>' : ''
+  let rep = (req.params.roomid.slice(0,2) == 'm-') ? '<script type="text/javascript" src="https://unpkg.com/clmtrackr@1.1.2/build/clmtrackr.js"></script>' : ''
 
   res.send(page.replace('{{clm}}', rep))
 })
