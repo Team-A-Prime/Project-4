@@ -5,11 +5,15 @@
   "license": "Unlicense",
   "main": "src/index.js",
   "scripts": {
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "test": "node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Team-A-Prime/Project-3.git"
+  },
+  "devDependencies": {
+    "mocha": "^4"
   },
   "dependencies": {
     "express": "3",

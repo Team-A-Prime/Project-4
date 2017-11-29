@@ -77,3 +77,5 @@ wss.on('connection', (socket, req) => {
     if (wss.rooms[room].members.length == 0) wss.rooms[room] = false
   })
 })
+
+module.exports = wss
