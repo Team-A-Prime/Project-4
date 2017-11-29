@@ -51,6 +51,7 @@ wss.on('connection', (socket, req) => {
   }
   socket.send(JSON.stringify(init_mes))
   socket.on('message', data => {
+    wss.rooms[room].members = wss.rooms[room].members.filter(s => s.readyState < 2)
     let msg = JSON.parse(data)
     if (msg.type == 'ping') {
       socket.send(JSON.stringify({type:'pong'}))
@@ -61,7 +62,6 @@ wss.on('connection', (socket, req) => {
     }
     for (let sock of wss.rooms[room].members) {
       if (sock.readyState > 1) {
-        wss.rooms[room].members = wss.rooms[room].members.filter(s => s.readyState < 2)
         continue
       }
       if (msg.to && msg.to != sock.id) continue
