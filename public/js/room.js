@@ -53,7 +53,8 @@ let createPeerConnection = (id) => {
         let draw = () => {
           requestAnimationFrame(draw)
           ctx.clearRect(0, 0, overlay.width, overlay.height)
-          if (ctracker.getScore() > 0.45) {
+          if (ctracker.getScore() > 0.45 || debug) {
+            if (debug) ctracker.draw(overlay)
             let pos = ctracker.getCurrentPosition()
             if (pos) {
               let scale = Math.sqrt((pos[14][0] - pos[0][0])**2 + (pos[14][1] - pos[0][1])**2)/170
@@ -69,6 +70,14 @@ let createPeerConnection = (id) => {
               ctx.rotate(ang_monocle)
               ctx.drawImage(monocle, -65, -65)
               ctx.setTransform(1,0,0,1,0,0)
+
+              if (debug) {
+                ctx.font = '14px Monospace'
+                ctx.fillText(`Probability: ${ctracker.getScore().toFixed(4)}`, 5, 15)
+                ctx.fillText(`Convergence: ${ctracker.getConvergence().toFixed(4)}`, 5, 30)
+                ctx.fillText(`Angle: ${ang_mustache.toFixed(4)} rads`, 5, 45)
+                ctx.fillText(`Scale: ${scale.toFixed(4)}`, 5, 60)
+              }
             }
           }
         }
@@ -94,6 +103,7 @@ let need_to_call = false
 let self_stream = false
 let id = false
 let name = localStorage.name || false
+let debug = false
 
 /**
  * Initiates a call to the room
@@ -230,6 +240,7 @@ chat_input.addEventListener('keydown', e => {
         localStorage.name = command.slice(1).join(' ')
         name = command.slice(1).join(' ')
       }
+      if (command[0] == 'debug') debug = !debug
     } else {
       signaler.say('chat', {type: 'message', from: name?name:id, text: chat_input.value})
     }
