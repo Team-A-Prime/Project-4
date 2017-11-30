@@ -92,6 +92,12 @@ body[data-layout="top-right"] #sidebar, [data-layout="top-left"] #sidebar {
   flex-direction: column-reverse;
   margin: 0px 5px 5px 5px;
 }
+body[data-layout="top-right"] button.mute-button, [data-layout="top-left"] button.mute-button {
+  top: 20px;
+}
+body[data-layout="bottom-left"] button.mute-button, [data-layout="top-left"] button.mute-button {
+  left: calc(10% - 35px);
+}
 body[data-layout="bottom-left"], body[data-layout="top-left"] {
   flex-direction: row-reverse;
 }
@@ -123,7 +129,7 @@ button.mute-button {
   background: red;
   border-color: red;
 }
-.mute-button.mute-enabled svg{
+.mute-button.mute-enabled svg {
   fill: white;
   stroke: white;
 }
