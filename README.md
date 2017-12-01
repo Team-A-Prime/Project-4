@@ -4,9 +4,9 @@ This repository contains the [project 4](https://wiki.ittc.ku.edu/ittc_wiki/inde
 
 It is capable of running a website where people can start video chats with each other remotely.
 
-# How to run
+## Use
+Install: ```npm install```
 
-```
-npm install
-npm start
-```
+Start: ```npm start```
+
+Test: ```npm test```
