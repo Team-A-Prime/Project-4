@@ -4,6 +4,8 @@ This directory contains source code documentation and development artifacts.
 
 [Deployment Plan](deployment-plan.pdf)
 
+[User Manual](User-Manual.pdf)
+
 [Code Documentation](code-doc.md)
 
 [Product Backlog](product-backlog.md)
