@@ -1,5 +1,9 @@
 This directory contains source code documentation and development artifacts.
 
+[Maitenance Plan](maitenance-plan.pdf)
+
+[Deployment Plan](deployment-plan.pdf)
+
 [Code Documentation](code-doc.md)
 
 [Product Backlog](product-backlog.md)
